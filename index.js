@@ -1,10 +1,9 @@
 import PlanilhaJson from './PlanilhaJson.js'
 const caminho = 'Y:/Pedagios/Sem Parar.xlsx'
-import db from './DBHandle.js'
+import client from './DB.js'
 
 async function LancaPedagio(){
     let Planilha = new PlanilhaJson()
-    let dbhandler = new db()
     try{
         let totais = await Planilha.importaplanilha(caminho,0)
         let fatura = totais[0].DESCRIÇÃO.trim()
@@ -14,13 +13,23 @@ async function LancaPedagio(){
         let passagens = new Number(totais[19].__EMPTY_2.replace('R$','').replace(',','').trim())
         let reducao = (valor - passagens) / passagens
         let extrato = await Planilha.importaplanilha(caminho,1)
-        console.log(extrato[0])
+        for(let i=1; i< 2; i++){
+            client.query(
+                `INSERT INTO public."Passagens"(
+                "Placa", "Valor", "Tipo")
+                VALUES ('${extrato[i].PLACA}', ${Number(extrato[i].VALOR.replace('R$','').replace(',','').trim())}, 'Passagem')`,
+                (err, res) => {
+                    if(err){
+                        console.error(err)
+                    }else{
+                        //console.log(res.rows.length)
+                        console.log(res.rowCount)
+                    }
+                    //client.end()
+                }
+            )
+        }
         
-        dbhandler.consulta(
-            `INSERT INTO public."Passagens"(
-            "Placa", "Valor", "Tipo")
-            VALUES ('${extrato[1].PLACA}', ${Number(extrato[1].VALOR.replace('R$','').replace(',','').trim())}, 'Passagem')`
-        )
     }catch(err){
         console.error(err)
     }
