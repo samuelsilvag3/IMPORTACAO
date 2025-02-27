@@ -6,11 +6,13 @@ async function connect() {
     //     return global.connection.connect()
     // }
     const pool = new Pool({
-        host: '127.0.0.1',
+        host: '10.0.0.100',
         port: 5432,
         user: 'postgres',
         password: 'rs97150979',
-        database: 'SSW2'
+        database: 'SSW2',
+        //idleTimeoutMillis: 10000,
+        maxUses: 7500
     })
     //retorna pool de conexões
     const client = await pool.connect();
@@ -19,30 +21,39 @@ async function connect() {
     return pool.connect();
 }
 
-async function selectPassagens(consulta) {
-    const client = await connect();
-    const res = await client.query(consulta);
-    return res.rows;
-}
-
-async function insertPassagens(Passagem){
-    let valorcorrigido
+async function insertAbastecimentos(Abastecimento){
     const client = await connect()
-    const sql = 'INSERT INTO public."Passagens"("Placa","Valor","Tipo") VALUES ($1,$2,$3);'
-    if(Number.isNaN(Passagem.Valor)){
-        valorcorrigido = 0
-    }else{
-        valorcorrigido = Passagem.Valor
-    }
-    const values = [Passagem.Placa, valorcorrigido, Passagem.Tipo]
+    const sql = 'INSERT INTO public."Abastecimentos"("Placa", "Odometro", "Quantidade", "Valor", "Nota", "Data", "Produto", "Motorista") VALUES ($1,$2,$3,$4,$5,$6,$7,$8);'
+    const values = [Abastecimento.Placa, Abastecimento.Odometro, Abastecimento.Quant, Abastecimento.Valor, Abastecimento.Nota, Abastecimento.Data, Abastecimento.Produto, Abastecimento.Motorista]
     return await client.query(sql, values)
-    //return { Unidade: 'SJR', Placa: 'KHX2J04', Total: 264.71 }
 }
 
-async function deletePassagens(){
+async function insertFaturas(Fatura){
     const client = await connect()
-    const sql = 'DELETE FROM public."Passagens"'
-    return await client.query(sql)
+    const sql = 'INSERT INTO public."Faturas"("Fatura", "Nota", "Emissao", "Vencimento", "Lancado", "Fornecedor") VALUES ($1,$2,$3,$4,$5,$6);'
+    const values = [Fatura.NumFat, Fatura.NumNF, Fatura.Emissao, Fatura.Vcto, false, Fatura.Fornecedor]
+    return await client.query(sql, values)
+}
+
+async function insertFornecedores(Fornecedor){
+    const client = await connect()
+    const sql = 'INSERT INTO public."Fornecedor"("Id", "Razao_Social", "Nome_Fantasia", "Municipio", "Especialidade", "Filial", "Evento") VALUES ($1,$2,$3,$4,$5,$6,$7);'
+    const values = [Fornecedor.Id, Fornecedor.Razao_Social, Fornecedor.Nome_Fantasia, Fornecedor.Municipio, Fornecedor.Especialidade, Fornecedor.Filial, Fornecedor.Evento]
+    return await client.query(sql, values)
+}
+
+async function insertLancamento(Lancamento){
+    const client = await connect()
+    const sql = 'INSERT INTO public."Despesa"("Lancamento", "Nota", "Evento", "DescricaoEvento", "Historico", "Usuario", "Emissao", "Vencimento", "Parcela", "ValorParcela", "Filial", "CNPJFornecedor") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);'
+    const values = [Lancamento.Lancamento, Lancamento.Nota, Lancamento.Evento, Lancamento.DescricaoEvento, Lancamento.Historico, Lancamento.Usuario, Lancamento.Emissao, Lancamento.Vencimento, Lancamento.Parcela, Lancamento.ValorParcela, Lancamento.Filial, Lancamento.CNPJFornecedor]
+    try{
+        return await client.query(sql, values)
+    }catch(err){
+        console.log('Erro ao fazer o Insert do Lancamento')
+        console.log(Lancamento)
+        console.log(err)
+    }
+    
 }
  
-export default { selectPassagens, insertPassagens, deletePassagens }
+export default { insertAbastecimentos, insertFaturas, insertFornecedores, insertLancamento }
