@@ -36,9 +36,9 @@ export class Arquivos{
     }
   }
 
-  async conteudoarquivo(arquivo){
+  async conteudoarquivo(diretorio, arquivo){
     try{
-        const caminho = path.join('Y:/FrotaFlex', arquivo)
+        const caminho = path.join(diretorio, arquivo)
         const conteudo = createReadStream(caminho)
         return conteudo
     }catch(err){

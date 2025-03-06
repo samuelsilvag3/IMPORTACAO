@@ -32,7 +32,7 @@ async function LancaAbastecimentos(){
                         if(linha[0] == '5'){
                             let lancamento = {
                                 'Lancamento': linha[2],
-                                'Nota': linha[19], 
+                                'Nota': linha[19].trim(),
                                 'Evento': Number(linha[4]),
                                 'DescricaoEvento': linha[5].slice(0,30),
                                 'Historico': linha[6].slice(0,30),

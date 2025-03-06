@@ -55,5 +55,19 @@ async function insertLancamento(Lancamento){
     }
     
 }
+
+async function insertCTRC(ctrc){
+    const client = await connect()
+    const sql = 'INSERT INTO public."Emissoes"("CTRC", "Uni_orig", "Uni_dest", "Cnpj_Pagador", "Nome_Pagador") VALUES ($1,$2,$3,$4,$5);'
+    const values = [ctrc.CTRC, ctrc.Uni_orig, ctrc.Uni_dest, ctrc.Cnpj_Pagador, ctrc.Nome_Pagador]
+    try{
+        return await client.query(sql, values)
+    }catch(err){
+        console.log('Erro ao fazer o Insert do Lancamento')
+        console.log(ctrc)
+        console.log(err)
+    }
+    
+}
  
-export default { insertAbastecimentos, insertFaturas, insertFornecedores, insertLancamento }
+export default { insertAbastecimentos, insertFaturas, insertFornecedores, insertLancamento, insertCTRC }

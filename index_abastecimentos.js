@@ -8,12 +8,13 @@ async function LancaAbastecimentos(){
     try{
         let arquivos = await filehandler.listaarquivos(diretorio)
         arquivos.forEach(async nomearquivo => {
-            let conteudo = await filehandler.conteudoarquivo(nomearquivo)
+            let conteudo = await filehandler.conteudoarquivo(diretorio, nomearquivo)
             const fatura = {}
             try{
                 Papa.parse(conteudo, {
                     delimiter: ',',
                     complete: async function(results){
+                        console.log(results)
                         const dados = results.data
                         fatura["NumFat"] = dados[7][7]
                         fatura["Emissao"] = dados[7][10]
@@ -33,11 +34,11 @@ async function LancaAbastecimentos(){
                                     'Valor': Number(linha[39].replace('.','').replace(',','.').trim()), 
                                     'Nota': linha[5]
                                 }
-                                let resultado = await db.insertAbastecimentos(Abastecimento)
+                                //let resultado = await db.insertAbastecimentos(Abastecimento)
                             }
                         })
                         console.log('Incluindo Fatura')
-                        let resultado2 = await db.insertFaturas(fatura)
+                        //let resultado2 = await db.insertFaturas(fatura)
                     }
                 })
             }catch(err){
