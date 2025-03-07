@@ -1,16 +1,17 @@
 import pg from 'pg'
+import 'dotenv/config'
 const {Pool} = pg
 
 async function connect() {
-    // if (global.connection){
-    //     return global.connection.connect()
-    // }
+    if (global.connection){
+        return global.connection.connect()
+    }
     const pool = new Pool({
-        host: '10.0.0.100',
-        port: 5432,
-        user: 'postgres',
-        password: 'rs97150979',
-        database: 'SSW2',
+        host: process.env.ENDPOINT,
+        port: process.env.PORTA,
+        user: process.env.USUARIO,
+        password: process.env.SENHA,
+        database: DB_NAME,
         //idleTimeoutMillis: 10000,
         maxUses: 7500
     })
