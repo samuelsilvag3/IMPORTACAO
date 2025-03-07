@@ -12,18 +12,21 @@ async function LancaAbastecimentos(){
                 complete: async function(results){
                     const dados = results.data
                     console.log('Incluindo Emissoes: ', dados.length)
+                    let CTRCS = []
                     dados.forEach(async linha => {
                         if(linha[0] == '2'){
-                            let CTRC = {
+                            const CTRC = {
                                 'CTRC': linha[1],
                                 'Uni_orig': linha[2],
                                 'Uni_dest': linha[17],
                                 'Cnpj_Pagador': Number(linha[6].slice(0,14)),
                                 'Nome_Pagador': linha[7].slice(0,30)
                             }
-                            let resultado2 = await db.insertCTRC(CTRC)
+                            CTRCS.push(CTRC)
                         }
                     })
+                    //console.log(CTRCS)
+                    let resultado2 = await db.insertCTRC(CTRCS)
                 }
             })
         }catch(err){
@@ -32,7 +35,7 @@ async function LancaAbastecimentos(){
             setTimeout(() => {
                 console.log('Pausa de 60 segundos concluída!')
                 process.kill(process.pid, 'SIGTERM')
-            }, 60000)
+            }, 600000)
             process.on('SIGTERM', () => {                    
                 console.log('Finally')
             })

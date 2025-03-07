@@ -11,9 +11,7 @@ async function connect() {
         port: process.env.PORTA,
         user: process.env.USUARIO,
         password: process.env.SENHA,
-        database: process.env.DB_NAME,
-        //idleTimeoutMillis: 10000,
-        maxUses: 7500
+        database: process.env.DB_NAME
     })
     //retorna pool de conexões
     const client = await pool.connect();
@@ -57,18 +55,41 @@ async function insertLancamento(Lancamento){
     
 }
 
-async function insertCTRC(ctrc){
+async function insertCTRC(ctrcs) {
     const client = await connect()
-    const sql = 'INSERT INTO public."Emissoes"("CTRC", "Uni_orig", "Uni_dest", "Cnpj_Pagador", "Nome_Pagador") VALUES ($1,$2,$3,$4,$5);'
-    const values = [ctrc.CTRC, ctrc.Uni_orig, ctrc.Uni_dest, ctrc.Cnpj_Pagador, ctrc.Nome_Pagador]
-    try{
-        return await client.query(sql, values)
-    }catch(err){
-        console.log('Erro ao fazer o Insert do Lancamento')
-        console.log(ctrc)
-        console.log(err)
-    }
+    const batchSize = 1000; // Tamanho do lote para cada inserção
     
+    try {
+        await client.query('BEGIN'); // Inicia uma transação
+        
+        for (let i = 0; i < ctrcs.length; i += batchSize) {
+            const batch = ctrcs.slice(i, i + batchSize);
+            const values = batch.map((ctrc, index) => 
+                `($${index * 5 + 1}, $${index * 5 + 2}, $${index * 5 + 3}, $${index * 5 + 4}, $${index * 5 + 5})`
+            ).join(',');
+            
+            const params = batch.flatMap(ctrc => [
+                ctrc.CTRC,
+                ctrc.Uni_orig,
+                ctrc.Uni_dest,
+                ctrc.Cnpj_Pagador,
+                ctrc.Nome_Pagador
+            ]);
+            
+            const sql = `INSERT INTO public."Emissoes"("CTRC", "Uni_orig", "Uni_dest", "Cnpj_Pagador", "Nome_Pagador") VALUES ${values};`;
+            await client.query(sql, params);
+        }
+        
+        await client.query('COMMIT'); // Confirma a transação
+        return { success: true, message: 'Dados inseridos com sucesso' };
+        
+    } catch (err) {
+        await client.query('ROLLBACK'); // Reverte a transação em caso de erro
+        console.error('Erro ao fazer o Insert dos CTRCs:', err);
+        throw err;
+    } finally {
+        client.release(); // Libera o cliente de volta para o pool
+    }
 }
  
 export default { insertAbastecimentos, insertFaturas, insertFornecedores, insertLancamento, insertCTRC }
