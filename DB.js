@@ -11,7 +11,7 @@ async function connect() {
         port: process.env.PORTA,
         user: process.env.USUARIO,
         password: process.env.SENHA,
-        database: DB_NAME,
+        database: process.env.DB_NAME,
         //idleTimeoutMillis: 10000,
         maxUses: 7500
     })
