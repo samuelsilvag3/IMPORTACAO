@@ -34,11 +34,11 @@ async function LancaAbastecimentos(){
                                     'Valor': Number(linha[39].replace('.','').replace(',','.').trim()), 
                                     'Nota': linha[5]
                                 }
-                                //let resultado = await db.insertAbastecimentos(Abastecimento)
+                                let resultado = await db.insertAbastecimentos(Abastecimento)
                             }
                         })
                         console.log('Incluindo Fatura')
-                        //let resultado2 = await db.insertFaturas(fatura)
+                        let resultado2 = await db.insertFaturas(fatura)
                     }
                 })
             }catch(err){
